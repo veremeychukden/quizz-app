@@ -1,30 +1,47 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import QUESTIONS from "../questions.js";
+import quizCompleted from "../assets/quiz-complete.png";
+import Question from "./Question.jsx";
 
 const Quiz = () => {
   const [userAnswers, setUserAnswers] = useState([]);
-  let activeQuestionIndex = userAnswers.length;
 
-  const handleSelectAnswer = (selectedAnswer) => {
+  const activeQuestionIndex = userAnswers.length;
+  const quizIsCompleted = activeQuestionIndex === QUESTIONS.length;
+
+  const handleSelectAnswer = useCallback(function handleSelectAnswer(
+    selectedAnswer
+  ) {
     setUserAnswers((prevUserAnswers) => {
       return [...prevUserAnswers, selectedAnswer];
     });
+  },
+  []);
+
+  const handleSkipAnswer = useCallback(
+    () => handleSelectAnswer(null),
+    [handleSelectAnswer]
+  );
+
+  if (quizIsCompleted) {
+    return (
+      <div id='summary'>
+        <img src={quizCompleted} alt='Quiz is completed' />
+        <h2>Quiz Completed!</h2>
+      </div>
+    );
   }
 
-  return(
-    <div id="quiz">
-      <div id="question">
-        <h2>{QUESTIONS[activeQuestionIndex].text}</h2>
-        <ul id="answers">
-          {QUESTIONS[activeQuestionIndex].answers.map((answer) => (
-            <li key={answer} className="answer">
-              <button onClick={() => handleSelectAnswer(answer)}>{answer}</button>
-            </li>
-          ))}
-        </ul>
-      </div>
+  return (
+    <div id='quiz'>
+      <Question
+        key={activeQuestionIndex}
+        index={activeQuestionIndex}
+        onSelectAnswer={handleSelectAnswer}
+        onSkipAnswer={handleSkipAnswer}
+      />
     </div>
-  )
-}
+  );
+};
 
 export default Quiz;
